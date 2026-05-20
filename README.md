@@ -115,4 +115,5 @@ The input string is automatically lowercased before hashing, matching FiveM's in
 
 ## Credits
 
-By **OffSey** for [XionShield](https://xionshield.eu)
+Created by **OffSey** for [xionshield.eu](https://xionshield.eu).
+The tool is fully open-source and available for everyone to use, modify, and integrate into their own projects.
