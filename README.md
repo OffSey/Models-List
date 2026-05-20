@@ -33,7 +33,7 @@ Built by **OffSey** for [XionShield](https://xionshield.eu).
 
 or: 
 
-1. Go to: https://offsey.github.io/Models-List/
+1. Go to: https://offsey.github.io/Models-List/ or [https://my.xionshield.eu/models](https://my.xionshield.eu/models)
 
 ---
 
