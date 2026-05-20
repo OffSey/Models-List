@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>FiveM Models Browser – XionShield</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      min-height: 100vh;
+      background: #0d1117;
+      font-family: 'Segoe UI', sans-serif;
+      color: #e6edf3;
+      position: relative;
+    }
+
+    canvas#bg {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .glow-orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.15;
+      pointer-events: none;
+      z-index: 0;
+      animation: orbFloat 8s ease-in-out infinite alternate;
+    }
+    .glow-orb.one { width: 420px; height: 420px; background: #cba052; top: -100px; left: -100px; animation-delay: 0s; }
+    .glow-orb.two { width: 320px; height: 320px; background: #e0b96a; bottom: -80px; right: -80px; animation-delay: 3s; }
+    .glow-orb.three { width: 200px; height: 200px; background: #cba052; bottom: 30%; left: 10%; animation-delay: 1.5s; opacity: 0.08; }
+
+    @keyframes orbFloat {
+      from { transform: translateY(0px) scale(1); }
+      to   { transform: translateY(30px) scale(1.08); }
+    }
+
+    .wrap {
+      position: relative;
+      z-index: 1;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 32px 24px;
+    }
+
+    .topbar {
+      background: rgba(22,27,34,0.85);
+      border: 1px solid #2a2a2a;
+      border-radius: 16px;
+      padding: 20px 28px;
+      margin-bottom: 24px;
+      backdrop-filter: blur(18px);
+      box-shadow: 0 4px 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(203,160,82,0.06);
+    }
+
+    .topbar-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      flex-shrink: 0;
+    }
+    .brand img { width: 30px; height: 30px; object-fit: contain; }
+    .brand-name { font-size: 1.1rem; font-weight: 700; }
+    .brand-name .xion { color: #cba052; }
+    .brand-name .shield { color: #e6edf3; }
+
+    .divider-v { width: 1px; height: 28px; background: #21262d; flex-shrink: 0; }
+
+    .title-block { flex: 1; min-width: 0; }
+    .title-block h1 { font-size: 1.1rem; font-weight: 700; color: #e6edf3; }
+    .title-block p { font-size: 0.78rem; color: #6e7681; margin-top: 2px; }
+
+    .search-wrap {
+      position: relative;
+      width: 280px;
+      flex-shrink: 0;
+    }
+    .search-wrap svg {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 15px; height: 15px;
+      color: #6e7681;
+      pointer-events: none;
+    }
+    .search-wrap input {
+      width: 100%;
+      background: #0d1117;
+      border: 1.5px solid #2a2a2a;
+      border-radius: 8px;
+      padding: 9px 12px 9px 36px;
+      font-size: 0.85rem;
+      color: #e6edf3;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      font-family: inherit;
+    }
+    .search-wrap input:focus { border-color: #cba052; box-shadow: 0 0 0 3px rgba(203,160,82,0.1); }
+    .search-wrap input::placeholder { color: #4a5568; }
+
+    .hash-btn {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 9px 16px;
+      border-radius: 8px;
+      border: 1px solid rgba(203,160,82,0.3);
+      background: rgba(203,160,82,0.08);
+      color: #cba052;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+      font-family: inherit;
+    }
+    .hash-btn:hover { background: rgba(203,160,82,0.15); border-color: #cba052; }
+    .hash-btn svg { width: 14px; height: 14px; }
+
+    .stats-badge {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 9px 16px;
+      border-radius: 8px;
+      border: 1px solid #21262d;
+      background: rgba(13,17,23,0.6);
+      color: #6e7681;
+      font-size: 0.82rem;
+      white-space: nowrap;
+    }
+    .stats-badge svg { width: 14px; height: 14px; }
+    .stats-badge strong { color: #e6edf3; }
+
+    .tabs-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 18px;
+      padding-top: 18px;
+      border-top: 1px solid #21262d;
+    }
+
+    .tab {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 8px;
+      border: 1px solid transparent;
+      background: rgba(255,255,255,0.02);
+      color: #6e7681;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+    .tab:hover { background: rgba(255,255,255,0.05); color: #e6edf3; }
+    .tab.active { background: rgba(203,160,82,0.12); border-color: rgba(203,160,82,0.4); color: #cba052; }
+    .tab .dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+    .tab .cnt { opacity: 0.6; font-weight: 400; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+      gap: 14px;
+    }
+
+    .model-card {
+      background: rgba(22,27,34,0.85);
+      border: 1px solid #21262d;
+      border-radius: 14px;
+      padding: 16px;
+      cursor: pointer;
+      transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+      backdrop-filter: blur(10px);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .model-card:hover {
+      border-color: rgba(203,160,82,0.45);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+    }
+
+    .card-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+    .card-label { font-size: 0.88rem; font-weight: 600; color: #e6edf3; line-height: 1.3; word-break: break-word; }
+
+    .badge {
+      font-size: 0.65rem;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 999px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .card-img {
+      background: rgba(13,17,23,0.7);
+      border-radius: 10px;
+      height: 110px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+    }
+    .card-img img { max-height: 100%; max-width: 100%; object-fit: contain; }
+
+    .no-preview {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      color: #3d444d;
+    }
+    .no-preview svg { width: 36px; height: 36px; }
+    .no-preview span { font-size: 0.7rem; }
+
+    .card-meta { display: flex; flex-direction: column; gap: 4px; }
+    .meta-row { display: flex; justify-content: space-between; align-items: center; font-size: 0.72rem; }
+    .meta-key { color: #6e7681; }
+    .meta-val { color: #c9d1d9; font-family: 'Cascadia Code', 'Consolas', monospace; max-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    .state-box {
+      background: rgba(22,27,34,0.85);
+      border: 1px solid #21262d;
+      border-radius: 16px;
+      padding: 64px 32px;
+      text-align: center;
+      backdrop-filter: blur(10px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+    .state-box svg { width: 48px; height: 48px; color: #3d444d; }
+    .state-box h3 { font-size: 1rem; font-weight: 600; color: #e6edf3; }
+    .state-box p { font-size: 0.82rem; color: #6e7681; max-width: 320px; }
+
+    .spinner {
+      width: 36px; height: 36px;
+      border: 2.5px solid rgba(203,160,82,0.2);
+      border-top-color: #cba052;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .pagination {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 24px;
+    }
+    .page-info { font-size: 0.78rem; color: #6e7681; }
+    .page-btns { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+
+    .page-btn {
+      padding: 6px 12px;
+      border-radius: 8px;
+      border: 1.5px solid #21262d;
+      background: rgba(13,17,23,0.6);
+      color: #8b949e;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+      font-family: inherit;
+    }
+    .page-btn:hover:not(:disabled) { border-color: #cba052; color: #cba052; background: rgba(203,160,82,0.08); }
+    .page-btn.active { border-color: #cba052; color: #cba052; background: rgba(203,160,82,0.12); }
+    .page-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+    .page-dots { font-size: 0.78rem; color: #4a5568; padding: 0 4px; }
+
+    .overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      background: rgba(0,0,0,0.78);
+      backdrop-filter: blur(6px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .overlay.hidden { display: none; }
+
+    .modal {
+      background: rgba(22,27,34,0.97);
+      border: 1px solid #2a2a2a;
+      border-radius: 18px;
+      width: 100%;
+      max-width: 500px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 80px rgba(0,0,0,0.7), 0 0 0 1px rgba(203,160,82,0.08);
+      animation: slideUp 0.2s ease;
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .modal-inner { padding: 28px; }
+
+    .modal-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 20px; }
+    .modal-title { font-size: 1.15rem; font-weight: 700; color: #e6edf3; line-height: 1.3; }
+
+    .close-btn {
+      width: 32px; height: 32px;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 8px;
+      border: 1px solid #21262d;
+      background: rgba(255,255,255,0.03);
+      cursor: pointer;
+      color: #8b949e;
+      transition: all 0.15s;
+      flex-shrink: 0;
+    }
+    .close-btn:hover { background: rgba(255,255,255,0.07); color: #e6edf3; }
+    .close-btn svg { width: 15px; height: 15px; }
+
+    .modal-img {
+      background: rgba(13,17,23,0.7);
+      border: 1px solid #21262d;
+      border-radius: 12px;
+      height: 200px;
+      display: flex; align-items: center; justify-content: center;
+      overflow: hidden;
+      position: relative;
+      margin-bottom: 20px;
+    }
+    .modal-img img { max-height: 100%; max-width: 100%; object-fit: contain; }
+
+    .info-rows { display: flex; flex-direction: column; gap: 10px; }
+
+    .info-row label {
+      display: block;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: #6e7681;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 5px;
+    }
+
+    .info-row-val {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      background: rgba(13,17,23,0.7);
+      border: 1px solid #21262d;
+      border-radius: 8px;
+      padding: 10px 14px;
+    }
+    .info-row-val span {
+      font-family: 'Cascadia Code', 'Consolas', monospace;
+      font-size: 0.88rem;
+      color: #c9d1d9;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .copy-btn {
+      width: 30px; height: 30px;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 6px;
+      border: 1px solid #30363d;
+      background: #21262d;
+      cursor: pointer;
+      color: #8b949e;
+      transition: all 0.15s;
+      flex-shrink: 0;
+    }
+    .copy-btn:hover { background: #30363d; border-color: #cba052; color: #cba052; }
+    .copy-btn svg { width: 13px; height: 13px; }
+
+    .joaat-modal { max-width: 460px; }
+
+    .joaat-input {
+      width: 100%;
+      background: #0d1117;
+      border: 1.5px solid #2a2a2a;
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-size: 0.95rem;
+      color: #e6edf3;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      font-family: 'Cascadia Code', 'Consolas', monospace;
+      margin-bottom: 6px;
+    }
+    .joaat-input:focus { border-color: #cba052; box-shadow: 0 0 0 3px rgba(203,160,82,0.1); }
+
+    .hash-rows { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
+
+    .hash-row {
+      background: rgba(13,17,23,0.7);
+      border: 1px solid #21262d;
+      border-radius: 10px;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      transition: border-color 0.2s;
+    }
+    .hash-row:hover { border-color: rgba(203,160,82,0.3); }
+    .hash-row-label { font-size: 0.7rem; color: #6e7681; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 3px; }
+    .hash-row-val { font-size: 1rem; font-weight: 600; color: #e6edf3; font-family: 'Cascadia Code', 'Consolas', monospace; }
+
+    .search-models-btn {
+      width: 100%;
+      background: transparent;
+      border: 1px solid #21262d;
+      border-radius: 10px;
+      padding: 12px 16px;
+      color: #8b949e;
+      font-size: 0.85rem;
+      font-family: inherit;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+    .search-models-btn:hover { background: rgba(203,160,82,0.08); border-color: #cba052; color: #cba052; }
+    .search-models-btn svg { width: 14px; height: 14px; }
+
+    .section-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #cba052;
+      margin-bottom: 12px;
+    }
+    .section-label svg { width: 14px; height: 14px; }
+
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: #cba052;
+      color: #0d1117;
+      font-weight: 700;
+      padding: 10px 22px;
+      border-radius: 8px;
+      font-size: 0.83rem;
+      opacity: 0;
+      transition: opacity 0.25s, transform 0.25s;
+      pointer-events: none;
+      z-index: 999;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: #0d1117; }
+    ::-webkit-scrollbar-thumb { background: #21262d; border-radius: 3px; }
+
+    @media (max-width: 640px) {
+      .topbar-row { flex-direction: column; align-items: flex-start; }
+      .search-wrap { width: 100%; }
+      .divider-v { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<canvas id="bg"></canvas>
+<div class="glow-orb one"></div>
+<div class="glow-orb two"></div>
+<div class="glow-orb three"></div>
+
+<div class="wrap">
+
+  <div class="topbar">
+    <div class="topbar-row">
+      <a class="brand" href="https://xionshield.eu" target="_blank">
+        <img src="https://cdn.xionhosting.de/uploads/xionsecurelogo.png" alt="XionShield" />
+        <span class="brand-name"><span class="xion">Xion</span><span class="shield">Shield</span></span>
+      </a>
+      <div class="divider-v"></div>
+      <div class="title-block">
+        <h1>Models Browser</h1>
+        <p>Browse all FiveM registered models - weapons, vehicles, peds, objects & explosions</p>
+      </div>
+      <div class="search-wrap">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input id="searchInput" type="text" placeholder="Search by name, model or hash..." />
+      </div>
+      <button class="hash-btn" id="openHashBtn">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="20" y2="15"/><line x1="10" y1="3" x2="8" y2="21"/><line x1="16" y1="3" x2="14" y2="21"/></svg>
+        Hash Converter
+      </button>
+      <div class="stats-badge">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+        <strong id="totalCount">0</strong>&nbsp;models
+      </div>
+    </div>
+
+    <div class="tabs-row">
+      <button class="tab active" data-cat="all">All <span class="cnt" id="cnt-all">0</span></button>
+      <button class="tab" data-cat="vehicles"><span class="dot" style="background:#a78bfa"></span>Vehicles <span class="cnt" id="cnt-vehicles">0</span></button>
+      <button class="tab" data-cat="peds"><span class="dot" style="background:#60a5fa"></span>Peds <span class="cnt" id="cnt-peds">0</span></button>
+      <button class="tab" data-cat="weapons"><span class="dot" style="background:#f87171"></span>Weapons <span class="cnt" id="cnt-weapons">0</span></button>
+      <button class="tab" data-cat="objects"><span class="dot" style="background:#4ade80"></span>Objects <span class="cnt" id="cnt-objects">0</span></button>
+      <button class="tab" data-cat="explosions"><span class="dot" style="background:#facc15"></span>Explosions <span class="cnt" id="cnt-explosions">0</span></button>
+    </div>
+  </div>
+
+  <div id="loadingState" class="state-box">
+    <div class="spinner"></div>
+    <p>Loading models...</p>
+  </div>
+
+  <div id="gridWrap" class="grid" style="display:none"></div>
+
+  <div id="noResults" class="state-box" style="display:none">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+    <h3>No results found</h3>
+    <p>Try adjusting your search or selecting a different category.</p>
+  </div>
+
+  <div id="paginationWrap" class="pagination" style="display:none">
+    <span class="page-info" id="pageInfo"></span>
+    <div class="page-btns" id="pageBtns"></div>
+  </div>
+
+</div>
+
+<div class="overlay hidden" id="modelOverlay">
+  <div class="modal">
+    <div class="modal-inner" id="modalContent"></div>
+  </div>
+</div>
+
+<div class="overlay hidden" id="hashOverlay">
+  <div class="modal joaat-modal">
+    <div class="modal-inner">
+      <div class="modal-head">
+        <div>
+          <div style="font-size:1.05rem;font-weight:700;color:#e6edf3;margin-bottom:3px;">JOAAT Hash Converter</div>
+          <div style="font-size:0.75rem;color:#6e7681;">Convert any string to a FiveM hash</div>
+        </div>
+        <button class="close-btn" id="closeHashBtn">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <div style="margin-bottom:6px;font-size:0.78rem;font-weight:600;color:#8b949e;text-transform:uppercase;letter-spacing:0.04em;">Input String</div>
+      <input type="text" class="joaat-input" id="hashInput" placeholder="enter_string_here" autocomplete="off" spellcheck="false" />
+      <div style="font-size:0.72rem;color:#6e7681;margin-bottom:18px;">Lowercased before hashing, as FiveM does internally.</div>
+
+      <div class="section-label">
+        Hashes
+      </div>
+
+      <div class="hash-rows">
+        <div class="hash-row">
+          <div>
+            <div class="hash-row-label">Signed (Int32)</div>
+            <div class="hash-row-val" id="hSigned">0</div>
+          </div>
+          <button class="copy-btn" onclick="hashCopy('hSigned',this)">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          </button>
+        </div>
+        <div class="hash-row">
+          <div>
+            <div class="hash-row-label">Unsigned (UInt32)</div>
+            <div class="hash-row-val" id="hUnsigned">0</div>
+          </div>
+          <button class="copy-btn" onclick="hashCopy('hUnsigned',this)">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          </button>
+        </div>
+        <div class="hash-row">
+          <div>
+            <div class="hash-row-label">Hexadecimal</div>
+            <div class="hash-row-val" id="hHex">0x0</div>
+          </div>
+          <button class="copy-btn" onclick="hashCopy('hHex',this)">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <button class="search-models-btn" id="hashSearchModels">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        Search this string in models list
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast">Copied to clipboard!</div>
+
+<script>
+const JSON_URL = "https://raw.githubusercontent.com/OffSey/FiveM-Models/main/models.json";
+const PAGE_SIZE = 40;
+
+let allModels = [];
+let filtered  = [];
+let page      = 1;
+
+const gridWrap      = document.getElementById("gridWrap");
+const noResults     = document.getElementById("noResults");
+const loadingState  = document.getElementById("loadingState");
+const paginationWrap= document.getElementById("paginationWrap");
+const pageBtns      = document.getElementById("pageBtns");
+const pageInfo      = document.getElementById("pageInfo");
+const searchInput   = document.getElementById("searchInput");
+const modelOverlay  = document.getElementById("modelOverlay");
+const hashOverlay   = document.getElementById("hashOverlay");
+
+function catMeta(raw) {
+  const m = {
+    weapons:    { label:"Weapon",    badgeCls:"background:rgba(248,113,113,0.12);color:#f87171;",    dot:"#f87171"    },
+    vehicles:   { label:"Vehicle",   badgeCls:"background:rgba(167,139,250,0.12);color:#a78bfa;",  dot:"#a78bfa"  },
+    peds:       { label:"Ped",       badgeCls:"background:rgba(96,165,250,0.12);color:#60a5fa;",    dot:"#60a5fa"    },
+    objects:    { label:"Object",    badgeCls:"background:rgba(74,222,128,0.12);color:#4ade80;",    dot:"#4ade80"    },
+    explosions: { label:"Explosion", badgeCls:"background:rgba(250,204,21,0.12);color:#facc15;",    dot:"#facc15"    },
+  };
+  return m[raw] ?? { label:raw, badgeCls:"background:rgba(255,255,255,0.05);color:#8b949e;", dot:"#8b949e" };
+}
+
+function imgSrc(model) {
+  const n = encodeURIComponent(String(model.name||"").toLowerCase());
+
+  if (model.cat === "weapons")  return `https://YOURURL/data/weapons/${model.name}.png`;   // line 657 - replace YOURURL
+  if (model.cat === "vehicles") return `https://YOURURL/data/vehicles/${n}.png`; // line 658 - replace YOURURL
+  if (model.cat === "peds")     return `https://YOURURL/data/peds/${n}.webp`;         // line 659 - replace YOURURL
+  if (model.cat === "objects")  return `https://YOURURL/data/objects/${n}.png`;       // line 660 - replace YOURURL
+  return null;
+}
+
+function noPreviewHTML(big=false) {
+  const s = big ? 48 : 32;
+  return `<div class="no-preview"><svg xmlns="http://www.w3.org/2000/svg" width="${s}" height="${s}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span>${big?"No preview available":""}</span></div>`;
+}
+
+function renderGrid(list) {
+  gridWrap.innerHTML = "";
+  if (!list.length) {
+    gridWrap.style.display = "none";
+    noResults.style.display = "flex";
+    paginationWrap.style.display = "none";
+    return;
+  }
+  noResults.style.display = "none";
+  gridWrap.style.display  = "grid";
+
+  list.forEach(m => {
+    const meta = catMeta(m.cat);
+    const src  = imgSrc(m);
+    const hash = m.hash || m.value || "—";
+
+    let imgBlock;
+    if (m.cat === "explosions") {
+      imgBlock = `<div class="card-img"><div class="no-preview"><svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><span>No preview</span></div></div>`;
+    } else if (src) {
+      imgBlock = `<div class="card-img"><img src="${src}" alt="${m.label}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div style="display:none;position:absolute;inset:0;align-items:center;justify-content:center">${noPreviewHTML()}</div></div>`;
+    } else {
+      imgBlock = `<div class="card-img">${noPreviewHTML()}</div>`;
+    }
+
+    const card = document.createElement("div");
+    card.className = "model-card";
+    card.innerHTML = `
+      <div class="card-header">
+        <div class="card-label">${m.label}</div>
+        <span class="badge" style="${meta.badgeCls}">${meta.label}</span>
+      </div>
+      ${imgBlock}
+      <div class="card-meta">
+        <div class="meta-row"><span class="meta-key">Model</span><span class="meta-val" title="${m.name}">${m.name}</span></div>
+        <div class="meta-row"><span class="meta-key">${m.hash?"Hash":"Value"}</span><span class="meta-val">${hash}</span></div>
+      </div>
+    `;
+    card.addEventListener("click", () => openModelModal(m));
+    gridWrap.appendChild(card);
+  });
+}
+
+function totalPages() { return Math.max(1, Math.ceil(filtered.length / PAGE_SIZE)); }
+
+function setPage(p, scroll=true) {
+  page = Math.max(1, Math.min(p, totalPages()));
+  const s = (page-1)*PAGE_SIZE;
+  renderGrid(filtered.slice(s, s+PAGE_SIZE));
+  renderPagination();
+  if (scroll) window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function renderPagination() {
+  pageBtns.innerHTML = "";
+  const total = totalPages();
+  if (total <= 1 && filtered.length === 0) { paginationWrap.style.display = "none"; return; }
+  paginationWrap.style.display = "flex";
+
+  const s = (page-1)*PAGE_SIZE+1;
+  const e = Math.min(page*PAGE_SIZE, filtered.length);
+  pageInfo.textContent = `Showing ${s} - ${e} of ${filtered.length} models`;
+
+  const mkBtn = (label, target, disabled=false, active=false) => {
+    const b = document.createElement("button");
+    b.className = "page-btn" + (active?" active":"");
+    b.textContent = label;
+    b.disabled = disabled;
+    if (!disabled) b.addEventListener("click", () => setPage(target));
+    return b;
+  };
+
+  pageBtns.appendChild(mkBtn("Prev", page-1, page===1));
+
+  const from = Math.max(1, page-2);
+  const to   = Math.min(total, page+2);
+
+  if (from > 1) {
+    pageBtns.appendChild(mkBtn("1", 1));
+    if (from > 2) { const d=document.createElement("span"); d.className="page-dots"; d.textContent="…"; pageBtns.appendChild(d); }
+  }
+  for (let i=from; i<=to; i++) pageBtns.appendChild(mkBtn(String(i), i, false, i===page));
+  if (to < total) {
+    if (to < total-1) { const d=document.createElement("span"); d.className="page-dots"; d.textContent="…"; pageBtns.appendChild(d); }
+    pageBtns.appendChild(mkBtn(String(total), total));
+  }
+  pageBtns.appendChild(mkBtn("Next", page+1, page===total));
+}
+
+function applyFilters() {
+  const q   = searchInput.value.toLowerCase().trim();
+  const cat = document.querySelector(".tab.active")?.dataset.cat || "all";
+  filtered = allModels.filter(m => {
+    const mc = cat==="all" || m.cat===cat;
+    const mq = !q || m.label.toLowerCase().includes(q) || m.name.toLowerCase().includes(q) || String(m.hash||m.value||"").includes(q);
+    return mc && mq;
+  });
+  page = 1;
+  setPage(1, false);
+}
+
+document.querySelectorAll(".tab").forEach(t => {
+  t.addEventListener("click", () => {
+    document.querySelectorAll(".tab").forEach(x => x.classList.remove("active"));
+    t.classList.add("active");
+    applyFilters();
+  });
+});
+searchInput.addEventListener("input", applyFilters);
+
+function openModelModal(m) {
+  const meta = catMeta(m.cat);
+  const src  = imgSrc(m);
+  const hash = m.hash || m.value || "—";
+  const hKey = m.hash ? "Hash" : "Value";
+
+  const extras = [
+    m.intHash    && ["intHash",    m.intHash],
+    m.hexHash    && ["hexHash",    m.hexHash],
+    m.signedHash && ["signedHash", m.signedHash],
+  ].filter(Boolean);
+
+  const infoRow = (label, val) => `
+    <div class="info-row">
+      <label>${label}</label>
+      <div class="info-row-val">
+        <span title="${val}">${val}</span>
+        <button class="copy-btn" onclick="copyText('${String(val).replace(/'/g,"\\'")}',this)">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        </button>
+      </div>
+    </div>`;
+
+  let imgBlock;
+  if (m.cat === "explosions") {
+    imgBlock = `<div class="modal-img"><div class="no-preview"><svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><span>No preview available</span></div></div>`;
+  } else if (src) {
+    imgBlock = `<div class="modal-img"><img src="${src}" alt="${m.label}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div style="display:none;position:absolute;inset:0;align-items:center;justify-content:center">${noPreviewHTML(true)}</div></div>`;
+  } else {
+    imgBlock = `<div class="modal-img">${noPreviewHTML(true)}</div>`;
+  }
+
+  document.getElementById("modalContent").innerHTML = `
+    <div class="modal-head">
+      <div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+          <span style="width:8px;height:8px;border-radius:50%;background:${meta.dot};display:inline-block;flex-shrink:0"></span>
+          <span class="modal-title">${m.label}</span>
+        </div>
+        <span class="badge" style="${meta.badgeCls}">${meta.label}</span>
+      </div>
+      <button class="close-btn" id="modalCloseBtn">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    ${imgBlock}
+    <div class="info-rows">
+      ${infoRow("Model Name", m.name)}
+      ${infoRow(hKey, hash)}
+      ${extras.map(([k,v]) => infoRow(k, v)).join("")}
+    </div>
+  `;
+
+  modelOverlay.classList.remove("hidden");
+  document.body.style.overflow = "hidden";
+  document.getElementById("modalCloseBtn").addEventListener("click", closeModelModal);
+}
+
+function closeModelModal() {
+  modelOverlay.classList.add("hidden");
+  document.body.style.overflow = "";
+}
+
+modelOverlay.addEventListener("click", e => { if (e.target===modelOverlay) closeModelModal(); });
+
+function openHashModal() {
+  hashOverlay.classList.remove("hidden");
+  document.body.style.overflow = "hidden";
+  setTimeout(() => document.getElementById("hashInput").focus(), 60);
+}
+function closeHashModal() {
+  hashOverlay.classList.add("hidden");
+  document.body.style.overflow = "";
+}
+
+document.getElementById("openHashBtn").addEventListener("click", openHashModal);
+document.getElementById("closeHashBtn").addEventListener("click", closeHashModal);
+hashOverlay.addEventListener("click", e => { if (e.target===hashOverlay) closeHashModal(); });
+
+document.addEventListener("keydown", e => {
+  if (e.key==="Escape") { closeModelModal(); closeHashModal(); }
+  if ((e.ctrlKey||e.metaKey) && e.key==="h") { e.preventDefault(); openHashModal(); }
+});
+
+function joaat(str) {
+  str = str.toLowerCase();
+  let h = 0;
+  for (let i=0; i<str.length; i++) {
+    h += str.charCodeAt(i);
+    h += (h << 10);
+    h ^= (h >>> 6);
+    h = h >>> 0;
+  }
+  h += (h << 3);
+  h ^= (h >>> 11);
+  h += (h << 15);
+  return h >>> 0;
+}
+
+function updateHashes() {
+  const val = document.getElementById("hashInput").value;
+  if (!val) {
+    document.getElementById("hSigned").textContent   = "0";
+    document.getElementById("hUnsigned").textContent = "0";
+    document.getElementById("hHex").textContent      = "0x0";
+    return;
+  }
+  const u = joaat(val);
+  document.getElementById("hSigned").textContent   = (u | 0);
+  document.getElementById("hUnsigned").textContent = u;
+  document.getElementById("hHex").textContent      = "0x" + u.toString(16).toUpperCase();
+}
+document.getElementById("hashInput").addEventListener("input", updateHashes);
+
+window.hashCopy = function(id, btn) {
+  const t = document.getElementById(id).textContent;
+  navigator.clipboard.writeText(t).then(showToast).catch(()=>{});
+  btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="#4ade80" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>`;
+  setTimeout(() => {
+    btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>`;
+  }, 1400);
+};
+
+window.copyText = function(text, btn) {
+  navigator.clipboard.writeText(text).then(showToast).catch(()=>{});
+  btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="#4ade80" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>`;
+  setTimeout(() => {
+    btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>`;
+  }, 1400);
+};
+
+document.getElementById("hashSearchModels").addEventListener("click", () => {
+  const val = document.getElementById("hashInput").value.trim();
+  if (!val) return;
+  closeHashModal();
+  searchInput.value = val;
+  applyFilters();
+  window.scrollTo({top:0,behavior:"smooth"});
+});
+
+function showToast() {
+  const t = document.getElementById("toast");
+  t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 1800);
+}
+
+fetch(JSON_URL)
+  .then(r => r.json())
+  .then(data => {
+    loadingState.style.display = "none";
+    const counts = { all:0, weapons:0, vehicles:0, peds:0, objects:0, explosions:0 };
+
+    Object.entries(data).forEach(([cat, items]) => {
+      Object.entries(items).forEach(([label, item]) => {
+        const m = { label, name: item.model, cat };
+        if (item.hash)       m.hash       = item.hash;
+        if (item.value)      m.value      = item.value;
+        if (item.intHash)    m.intHash    = item.intHash;
+        if (item.hexHash)    m.hexHash    = item.hexHash;
+        if (item.signedHash) m.signedHash = item.signedHash;
+        allModels.push(m);
+        counts[cat] = (counts[cat]||0) + 1;
+        counts.all++;
+      });
+    });
+
+    allModels.sort((a,b) => a.label.localeCompare(b.label));
+
+    Object.entries(counts).forEach(([k,v]) => {
+      const el = document.getElementById(`cnt-${k}`);
+      if (el) el.textContent = v.toLocaleString();
+    });
+    document.getElementById("totalCount").textContent = counts.all.toLocaleString();
+
+    filtered = allModels.slice();
+    setPage(1, false);
+  })
+  .catch(() => {
+    loadingState.style.display = "none";
+    gridWrap.style.display = "grid";
+    gridWrap.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:48px;color:#6e7681;font-size:0.88rem;">Network error - could not load models. Make sure <code>models.json</code> is available in the repository.</div>`;
+  });
+
+const canvas = document.getElementById("bg");
+const ctx = canvas.getContext("2d");
+let W, H, particles = [];
+
+function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+
+function initParticles() {
+  particles = [];
+  const count = Math.floor((W*H)/14000);
+  for (let i=0; i<count; i++) {
+    particles.push({
+      x: Math.random()*W, y: Math.random()*H,
+      r: 0.5+Math.random()*1.5,
+      dx: (Math.random()-0.5)*0.3,
+      dy: -(0.05+Math.random()*0.2),
+      a: 0.2+Math.random()*0.5,
+    });
+  }
+}
+
+function drawParticles() {
+  ctx.clearRect(0,0,W,H);
+  for (const p of particles) {
+    ctx.beginPath();
+    ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+    ctx.fillStyle = `rgba(203,160,82,${p.a})`;
+    ctx.fill();
+    p.x+=p.dx; p.y+=p.dy;
+    if (p.y<-5) { p.y=H+5; p.x=Math.random()*W; }
+    if (p.x<-5) p.x=W+5;
+    if (p.x>W+5) p.x=-5;
+  }
+  for (let i=0; i<particles.length; i++) {
+    for (let j=i+1; j<particles.length; j++) {
+      const a=particles[i], b=particles[j];
+      const d=Math.hypot(a.x-b.x,a.y-b.y);
+      if (d<100) {
+        ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y);
+        ctx.strokeStyle=`rgba(203,160,82,${0.1*(1-d/100)})`; ctx.lineWidth=0.5; ctx.stroke();
+      }
+    }
+  }
+  requestAnimationFrame(drawParticles);
+}
+
+window.addEventListener("resize", () => { resize(); initParticles(); });
+resize(); initParticles(); drawParticles();
+</script>
+</body>
+</html>
