@@ -27,6 +27,10 @@ Built by **OffSey** for [XionShield](https://xionshield.eu).
 2. Make sure `models.json` is present (see [Data Format](#data-format) below)
 3. Open `index.html` in any modern browser
 
+or: 
+
+1. Go to: https://offsey.github.io/Models-List/
+
 ---
 
 ## Data Format
